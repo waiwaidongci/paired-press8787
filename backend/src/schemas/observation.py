@@ -1,5 +1,5 @@
 from pydantic import BaseModel,Field
-class MatchedPairInput(BaseModel):
+class ReReadingInput(BaseModel):
     source_key:str=Field(min_length=1,max_length=100)
     values:dict
-ObservationInput=MatchedPairInput
+ObservationInput=ReReadingInput

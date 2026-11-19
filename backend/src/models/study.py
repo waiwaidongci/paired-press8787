@@ -6,4 +6,5 @@ class PressStudy(Base):
     name=Column(String(120),unique=True,nullable=False)
     source_filename=Column(String(120),nullable=False)
     description=Column(Text,default='')
+    data_version=Column(Integer,nullable=False,default=1)
 Study=PressStudy

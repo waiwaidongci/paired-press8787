@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,HTTPException
+from fastapi import APIRouter,Depends
 from fastapi.responses import Response
 from sqlalchemy import select
 from src.config.database import get_db
@@ -6,13 +6,13 @@ from src.config.domain import DOMAIN
 from src.middlewares.auth import current_user,writer,admin
 from src.schemas.study import StudyInput
 from src.schemas.observation import ObservationInput
+from src.schemas.candidate import CandidateInput
+from src.schemas.quota import QuotaInput
 from src.schemas.run import RunInput
 from src.schemas.review import ReviewInput
 from src.controllers import research
 from src.services import runs,studies
 from src.models.audit import Audit
-from src.models.observation import Observation
-from src.services.audits import log
 from src.utils.serializers import record
 router=APIRouter()
 @router.get('/domain')
@@ -30,10 +30,19 @@ def add(id:int,data:ObservationInput,db=Depends(get_db),user=Depends(writer)): r
 @router.put('/studies/{id}/observations/{row_id}')
 def update(id:int,row_id:int,data:ObservationInput,db=Depends(get_db),user=Depends(writer)): return research.save_row(db,id,data,user,row_id)
 @router.delete('/studies/{id}/observations/{row_id}')
-def remove(id:int,row_id:int,db=Depends(get_db),user=Depends(writer)):
-    row=db.get(Observation,row_id)
-    if not row or row.study_id!=id: raise HTTPException(404,'记录不存在')
-    db.delete(row);log(db,user,'observation.delete',row_id);db.commit();return {'deleted':True}
+def remove(id:int,row_id:int,db=Depends(get_db),user=Depends(writer)): return studies.delete_observation(db,id,row_id,user)
+@router.get('/studies/{id}/candidates')
+def candidates(id:int,db=Depends(get_db),user=Depends(current_user)): return research.list_candidates(db,id)
+@router.post('/studies/{id}/candidates')
+def add_candidate(id:int,data:CandidateInput,db=Depends(get_db),user=Depends(writer)): return research.save_candidate(db,id,data,user)
+@router.delete('/studies/{id}/candidates/{cid}')
+def remove_candidate(id:int,cid:int,db=Depends(get_db),user=Depends(writer)): return studies.delete_candidate(db,id,cid,user)
+@router.get('/studies/{id}/quotas')
+def quotas(id:int,db=Depends(get_db),user=Depends(current_user)): return research.list_quotas(db,id)
+@router.post('/studies/{id}/quotas')
+def save_quota(id:int,data:QuotaInput,db=Depends(get_db),user=Depends(writer)): return research.save_quota(db,id,data,user)
+@router.delete('/studies/{id}/quotas/{qid}')
+def remove_quota(id:int,qid:int,db=Depends(get_db),user=Depends(writer)): return studies.delete_quota(db,id,qid,user)
 @router.get('/runs')
 def list_runs(db=Depends(get_db),user=Depends(current_user)): return runs.list_runs(db)
 @router.post('/runs')

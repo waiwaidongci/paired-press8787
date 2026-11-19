@@ -1,8 +1,8 @@
-name: paired-press
+name: shift-chroma
 services:
   db:
     image: postgres:16-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-paired-press}-db
+    container_name: ${COMPOSE_PROJECT_NAME:-shift-chroma}-db
     environment:
       POSTGRES_DB: research
       POSTGRES_USER: research
@@ -16,7 +16,7 @@ services:
       retries: 40
   redis:
     image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-paired-press}-redis
+    container_name: ${COMPOSE_PROJECT_NAME:-shift-chroma}-redis
     command: redis-server --appendonly yes
     volumes: ["redis-data:/data"]
     healthcheck:
@@ -26,11 +26,11 @@ services:
       retries: 20
   backend:
     build: ./backend
-    container_name: ${COMPOSE_PROJECT_NAME:-paired-press}-backend
+    container_name: ${COMPOSE_PROJECT_NAME:-shift-chroma}-backend
     environment: &app-env
       DATABASE_URL: postgresql+psycopg://research:${DB_PASSWORD:-local-demo-db-2026}@db:5432/research
       REDIS_URL: redis://redis:6379/0
-      JWT_SECRET: ${JWT_SECRET:-local-demo-paired-press-replace-for-production}
+      JWT_SECRET: ${JWT_SECRET:-local-demo-shift-chroma-replace-for-production}
       SEED_DEMO: ${SEED_DEMO:-true}
     ports: ["${BACKEND_PORT:-19242}:8000"]
     volumes: ["run-artifacts:/app/artifacts"]
@@ -44,7 +44,7 @@ services:
       retries: 40
   worker:
     build: ./backend
-    container_name: ${COMPOSE_PROJECT_NAME:-paired-press}-worker
+    container_name: ${COMPOSE_PROJECT_NAME:-shift-chroma}-worker
     command: python -m src.worker
     environment: *app-env
     volumes: ["run-artifacts:/app/artifacts"]
@@ -59,7 +59,7 @@ services:
       retries: 20
   frontend:
     build: ./frontend
-    container_name: ${COMPOSE_PROJECT_NAME:-paired-press}-frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-shift-chroma}-frontend
     ports: ["${FRONTEND_PORT:-18242}:80"]
     depends_on:
       backend: {condition: service_healthy}

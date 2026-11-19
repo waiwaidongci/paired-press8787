@@ -1,6 +1,6 @@
 from sqlalchemy import Column,Integer,String,JSON,Text,ForeignKey
 from src.config.database import Base
-class PairedRun(Base):
+class PlanRun(Base):
     __tablename__='runs'
     id=Column(Integer,primary_key=True)
     study_id=Column(Integer,ForeignKey('studies.id'),nullable=False)
@@ -9,7 +9,8 @@ class PairedRun(Base):
     parameters=Column(JSON,nullable=False)
     snapshot=Column(JSON,nullable=False)
     checksum=Column(String(64),nullable=False)
+    data_version=Column(Integer,nullable=False,default=1)
     result=Column(JSON,nullable=True)
     error=Column(Text,default='')
     created_at=Column(String(40),nullable=False)
-Run=PairedRun
+Run=PlanRun
